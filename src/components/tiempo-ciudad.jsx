@@ -1,29 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-import Navegacion from "../src/components/navegacion";
-import PiePag from "../src/components/piePag";
-import Home from "../src/pages/home";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 
-function App() {
-  return (
-
-    <Router>
-      <Navegacion />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/proyecto" element={<Home />} />
-      </Routes>
-      <PiePag />
-    </Router>
-  )
-}
-
-
-
-export default App;
-
-/*
 const Weather = () => {
   const [weatherData, setWeatherData] = useState(null);
   const API_KEY = "7aa3fe57771492099a417745346baa4a";
@@ -62,29 +40,29 @@ const Weather = () => {
 
     getLocation();
   }, []);
-*/
 
-/*
-  <div className="p-4">
-    {weatherData ? (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-2">{weatherData.name}</h2>
-        <p className="text-gray-700">
-          {weatherData.weather[0].description}
-        </p>
-        <p className="text-lg font-semibold">
-          🌡️ {weatherData.main.temp}°C
-        </p>
-        <p className="text-gray-600">
-          Humedad: {weatherData.main.humidity}%
-        </p>
-        <p className="text-gray-600">
-          Viento: {weatherData.wind.speed} m/s
-        </p>
-      </div>
-    ) : (
-      <p>Cargando el clima...</p>
-    )}
-  </div>
-);
-*/
+  return (
+    <div className="p-4">
+      {weatherData ? (
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold mb-2">{weatherData.name}</h2>
+          <p className="text-gray-700">
+            {weatherData.weather[0].description}
+          </p>
+          <p className="text-lg font-semibold">
+            🌡️ {weatherData.main.temp}°C
+          </p>
+          <p className="text-gray-600">
+            Humedad: {weatherData.main.humidity}%
+          </p>
+          <p className="text-gray-600">
+            Viento: {weatherData.wind.speed} m/s
+          </p>
+        </div>
+      ) : (
+        <p>Cargando el clima...</p>
+      )}
+    </div>
+  );
+}
+export default Weather;
