@@ -1,5 +1,5 @@
 import React from "react";
-//import Weather from "../components/tiempo-ciudad";
+import Weather from "../components/tiempo-ciudad";
 import MainImg from "../components/main-img";
 
 function Home() {
@@ -7,6 +7,7 @@ function Home() {
         <div>
 
           <MainImg />
+          <Weather />
 
         </div>
     )
