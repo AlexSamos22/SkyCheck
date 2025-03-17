@@ -64,36 +64,102 @@ const Weather = () => {
   // Función para mostrar el pronóstico de 5 días
   const obtenerPronostico5Dias = () => {
     if (!forecastData) return null;
-    return forecastData.list.slice(0, 5).map((item, index) => {
-      const date = new Date(item.dt * 1000); // Convertir a fecha
+
+    const pronosticoPorDia = {};
+    const hoy = new Date().toLocaleDateString("es-ES", { weekday: "long" });
+
+    forecastData.list.forEach((item) => {
+      const date = new Date(item.dt * 1000);
+      const fecha = date.toLocaleDateString("es-ES", { weekday: "long" });
+
+      if (fecha !== hoy) {
+        if (
+          !pronosticoPorDia[fecha] ||
+          Math.abs(date.getHours() - 12) <
+          Math.abs(new Date(pronosticoPorDia[fecha].dt * 1000).getHours() - 12)
+        ) {
+          pronosticoPorDia[fecha] = item;
+        }
+      }
+    });
+
+    return Object.keys(pronosticoPorDia).map((dia, index) => {
+      const item = pronosticoPorDia[dia];
+
       return (
-          <div key={index} className="p-2 w-full">
-            <h4>{date.toLocaleString()} - {item.weather[0].description}</h4>
-            <p>Temperatura: {item.main.temp}°C</p>
-            <p>Viento: {item.wind.speed} m/s</p>
-          </div>
+        <div key={index} className="p-2 w-full border-b border-blue-500 last:border-b-0 flex items-center justify-between">
+          <h4 className="capitalize font-bold flex items-center text-orange-600 w-1/2">{dia}</h4>
+          <p className="text-base font-semibold flex items-center w-full">{obtenerIconoClima(item.weather[0].main)} {item.main.temp}°C</p>
+
+          <p className="text-base font-semibold flex items-center w-full">
+            🌤️ {item.weather[0].description.charAt(0).toUpperCase() + item.weather[0].description.slice(1)}
+          </p>
+
+          <p className="text-base font-semibold flex items-center w-full">
+            💨 Viento: {item.wind.speed} m/s
+          </p>
+
+          <p className="text-base font-semibold flex items-center w-full">
+            💧 Humedad: {item.main.humidity}%
+          </p>
+        </div>
       );
     });
   };
+
+
+
+
 
   // Función para mostrar la predicción de las siguientes 3 horas
   const obtenerPronostico3Horas = () => {
     if (!forecastData) return null;
-    return forecastData.list.slice(0, 3).map((item, index) => {
-      const date = new Date(item.dt * 1000); // Convertir a fecha
-      const options = { hour: "2-digit", minute: "2-digit", hour12: false };
 
-      const hora = date.toLocaleString("es-ES", options);
+    const ahora = new Date();
+    const pronosticoFiltrado = forecastData.list.filter((item) => {
+      const horaPronostico = new Date(item.dt * 1000);
+      return horaPronostico.getTime() > ahora.getTime();
+    });
+
+    if (pronosticoFiltrado.length < 3) return <p>No hay suficientes datos</p>;
+
+    return pronosticoFiltrado.slice(1, 6).map((item, index) => {
+      const date = new Date(item.dt * 1000);
+      const hora = date.toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
       return (
-          <div key={index} className="p-2 w-full">
-            <h4>{hora} - {item.weather[0].description}</h4>
-            <p>Temperatura: {item.main.temp}°C</p>
-            <p>Viento: {item.wind.speed} m/s</p>
-          </div>
+        <div key={index} className="p-2 w-full border-b border-blue-500 last:border-b-0 flex  items-center justify-between">
+          <h4 className="capitalize font-bold self-center text-orange-600 w-1/2">{hora}</h4>
+
+          <p className="text-base font-semibold flex items-center w-full">
+            {obtenerIconoClima(item.weather[0].main)}
+            {item.main.temp}°C
+          </p>
+
+          <p className="text-base font-semibold flex items-center w-full">
+            🌤️ {item.weather[0].description.charAt(0).toUpperCase() + item.weather[0].description.slice(1)}
+          </p>
+
+          <p className="text-base font-semibold flex items-center w-full">
+            💨 Viento: {item.wind.speed} m/s
+          </p>
+
+
+          <p className="text-base font-semibold flex items-center w-full">
+            💧 Humedad: {item.main.humidity}%
+          </p>
+        </div>
 
       );
     });
   };
+
+
+
 
   // Función para obtener el icono del clima
   const obtenerIconoClima = (clima) => {
@@ -115,29 +181,49 @@ const Weather = () => {
 
   return (
     <>
-      <div className="p-4 grid grid-cols-2 justify-items-center content-center gap-4 ">
+      <div className="m-2 grid grid-cols-2 justify-items-center content-center gap-4 ">
         {/* Información del Clima */}
-        <div className="p-6 flex flex-col items-center w-full">
+        <div className="p-6 flex flex-col items-center w-full gap-2">
           <FechaHoraLocal />
           {weatherData ? (
             <>
-              <h2 className="text-2xl font-bold mb-2">{weatherData.name}</h2>
+              <h2 className="text-2xl font-bold">{weatherData.name}</h2>
 
-              <p className="text-lg font-semibold flex justify-center items-center"> {obtenerIconoClima(weatherData.weather[0].main)} {weatherData.main.temp}°C</p>
-
-              <p className="text-black font-semibold">
-                {weatherData.weather[0].description.charAt(0).toUpperCase() +
-                  weatherData.weather[0].description.slice(1)}, Sensación térmica: {weatherData.main.feels_like}°C
+              {/* Temperatura e icono */}
+              <p className="font-semibold flex items-center gap-2 text-xl w-full justify-center">
+                {obtenerIconoClima(weatherData.weather[0].main)}
+                <span>{weatherData.main.temp}°C</span>
               </p>
 
-              <p className="text-black font-semibold">Humedad: {weatherData.main.humidity}%</p>
-              <p className="text-black font-semibold">Viento: {weatherData.wind.speed} m/s</p>
-              <p className="text-black font-semibold">Visibilidad: {(weatherData.visibility / 1000).toFixed(1)} km</p>
+              {/* Descripción del clima */}
+              <p className="text-black font-semibold text-center flex items-center gap-2 justify-center text-xl">
+                {weatherData.weather[0].description.charAt(0).toUpperCase() +
+                  weatherData.weather[0].description.slice(1)}, Sensación térmica: {weatherData.main.feels_like.toFixed(0)}°C
+              </p>
+
+              {/* Humedad */}
+              <p className="text-black font-semibold flex items-center gap-2 text-xl justify-center">
+                <span>💧</span>
+                <span>Humedad: {weatherData.main.humidity}%</span>
+              </p>
+
+              {/* Viento */}
+              <p className="text-black font-semibold flex items-center gap-2 text-xl justify-center">
+                <span>💨</span>
+                <span>Viento: {weatherData.wind.speed} m/s</span>
+              </p>
+
+              {/* Visibilidad */}
+              <p className="text-black font-semibold flex items-center gap-2 text-xl justify-center">
+                <span>🌫️</span>
+                <span>Visibilidad: {(weatherData.visibility / 1000).toFixed(1)} km</span>
+              </p>
             </>
           ) : (
             <p>Cargando el clima...</p>
           )}
         </div>
+
 
         {/* Mapa OpenStreetMap */}
         <div className="p-6 w-full">
@@ -159,20 +245,20 @@ const Weather = () => {
         </div>
 
         <div className="p-4 w-full">
-          <h3 className="font-bold text-lg">Pronóstico de las próximas 3 horas</h3>
-          <div className="flex justify-center items-center">
+          <h3 className="font-bold text-lg">Pronóstico en las proximas horas</h3>
+          <div className="">
             {obtenerPronostico3Horas()}
           </div>
-          
+
         </div>
 
 
         <div className="p-4 w-full">
           <h3 className="font-bold text-lg">Pronóstico de los próximos 5 días</h3>
-          <div className="flex justify-center items-center">
+          <div className="">
             {obtenerPronostico5Dias()}
           </div>
-          
+
         </div>
 
       </div>
